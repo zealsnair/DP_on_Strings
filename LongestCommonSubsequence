@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // Recursive Approach with Memoization
+    int rec(int ind1, int ind2, string &s, string &t, vector<vector<int>> &dp) {
+        if (ind1 < 0 || ind2 < 0) return 0;
+
+        if (dp[ind1][ind2] != -1) return dp[ind1][ind2];
+
+        if (s[ind1] == t[ind2])
+            return dp[ind1][ind2] = 1 + rec(ind1 - 1, ind2 - 1, s, t, dp);
+        else
+            return dp[ind1][ind2] = max(rec(ind1 - 1, ind2, s, t, dp), rec(ind1, ind2 - 1, s, t, dp));
+    }
+
+    // Tabulation Approach (Bottom-Up DP)
+    int tab(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+
+        for (int ind1 = 1; ind1 <= n; ++ind1) {
+            for (int ind2 = 1; ind2 <= m; ++ind2) {
+                if (s[ind1 - 1] == t[ind2 - 1])
+                    dp[ind1][ind2] = 1 + dp[ind1 - 1][ind2 - 1];
+                else
+                    dp[ind1][ind2] = max(dp[ind1 - 1][ind2], dp[ind1][ind2 - 1]);
+            }
+        }
+        return dp[n][m];
+    }
+
+    // Space Optimized Approach (Using Single Array)
+    int so(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<int> prev(m + 1, 0), curr(m + 1, 0);
+
+        for (int ind1 = 1; ind1 <= n; ++ind1) {
+            for (int ind2 = 1; ind2 <= m; ++ind2) {
+                if (s[ind1 - 1] == t[ind2 - 1])
+                    curr[ind2] = 1 + prev[ind2 - 1];
+                else
+                    curr[ind2] = max(prev[ind2], curr[ind2 - 1]);
+            }
+            prev = curr;
+        }
+        return prev[m];
+    }
+
+    // Main function to find the Longest Common Subsequence
+    int longestCommonSubsequence(string s, string t) {
+        int n = s.length(), m = t.length();
+
+        // Recursive (Memoization)
+        vector<vector<int>> dp(n, vector<int>(m, -1));
+        int recAns = rec(n - 1, m - 1, s, t, dp);
+        cout << "Recursive (Memoization) Result: " << recAns << endl;
+
+        // Tabulation Approach
+        int tabAns = tab(s, t);
+        cout << "Tabulation Result: " << tabAns << endl;
+
+        // Space Optimized Approach
+        int soAns = so(s, t);
+        cout << "Space Optimized Result: " << soAns << endl;
+
+        return soAns;  // Returning the optimized approach answer
+    }
+};
+
+// Main Function for User Input
+int main() {
+    string s, t;
+
+    cout << "Enter first string: ";
+    cin >> s;
+    cout << "Enter second string: ";
+    cin >> t;
+
+    Solution sol;
+    int result = sol.longestCommonSubsequence(s, t);
+    cout << "Longest Common Subsequence Length: " << result << endl;
+
+    return 0;
+}

@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // Recursive Approach with Memoization
+    int rec(int i, int j, string &s, vector<vector<int>> &dp) {
+        if (i > j) return 0;
+        if (i == j) return 1; // Single character is always a palindrome
+        
+        if (dp[i][j] != -1) return dp[i][j];
+
+        if (s[i] == s[j]) 
+            return dp[i][j] = 2 + rec(i + 1, j - 1, s, dp);
+        
+        return dp[i][j] = max(rec(i + 1, j, s, dp), rec(i, j - 1, s, dp));
+    }
+
+    // Tabulation Approach (Bottom-Up DP)
+    int tab(string &s) {
+        int n = s.length();
+        vector<vector<int>> dp(n, vector<int>(n, 0));
+
+        for (int i = 0; i < n; i++) 
+            dp[i][i] = 1;
+
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i <= n - len; i++) {
+                int j = i + len - 1;
+                if (s[i] == s[j]) 
+                    dp[i][j] = 2 + dp[i + 1][j - 1];
+                else 
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+
+        return dp[0][n - 1];
+    }
+
+    // Space Optimized Approach (Using Two Arrays)
+    int so(string &s) {
+        int n = s.length();
+        vector<int> prev(n, 0), curr(n, 0);
+
+        for (int i = n - 1; i >= 0; i--) {
+            curr[i] = 1;
+            for (int j = i + 1; j < n; j++) {
+                if (s[i] == s[j]) 
+                    curr[j] = 2 + prev[j - 1];
+                else 
+                    curr[j] = max(prev[j], curr[j - 1]);
+            }
+            prev = curr;
+        }
+
+        return prev[n - 1];
+    }
+
+    // Main function to find the Longest Palindromic Subsequence
+    void longestPalindromeSubseq(string s) {
+        int n = s.length();
+
+        // Recursive (Memoization)
+        vector<vector<int>> dp(n, vector<int>(n, -1));
+        int recAns = rec(0, n - 1, s, dp);
+        cout << "Recursive (Memoization) LPS Length: " << recAns << endl;
+
+        // Tabulation Approach
+        int tabAns = tab(s);
+        cout << "Tabulation LPS Length: " << tabAns << endl;
+
+        // Space Optimized Approach
+        int soAns = so(s);
+        cout << "Space Optimized LPS Length: " << soAns << endl;
+    }
+};
+
+// Main Function for User Input
+int main() {
+    string s;
+
+    cout << "Enter a string: ";
+    cin >> s;
+
+    Solution sol;
+    sol.longestPalindromeSubseq(s);
+
+    return 0;
+}

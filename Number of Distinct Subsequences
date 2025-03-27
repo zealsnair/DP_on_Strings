@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // Recursive Approach with Memoization
+    int rec(int i, int j, string &s, string &t, vector<vector<int>> &dp) {
+        if (j < 0) return 1; // If target string is completely matched
+        if (i < 0) return 0; // If main string is exhausted but target is not
+
+        if (dp[i][j] != -1) return dp[i][j];
+
+        if (s[i] == t[j]) 
+            return dp[i][j] = rec(i - 1, j - 1, s, t, dp) + rec(i - 1, j, s, t, dp);
+        else 
+            return dp[i][j] = rec(i - 1, j, s, t, dp);
+    }
+
+    // Tabulation (Bottom-Up DP)
+    int tab(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<vector<double>> dp(n + 1, vector<double>(m + 1, 0));
+
+        for (int i = 0; i <= n; i++) dp[i][0] = 1; // Empty target string
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (s[i - 1] == t[j - 1]) 
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
+                else 
+                    dp[i][j] = dp[i - 1][j];
+            }
+        }
+
+        return (int)dp[n][m]; // Convert double back to int
+    }
+
+    // Space Optimized Approach (Using Two Arrays)
+    int so(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<double> prev(m + 1, 0), curr(m + 1, 0);
+
+        prev[0] = curr[0] = 1; // Base case
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (s[i - 1] == t[j - 1]) 
+                    curr[j] = prev[j - 1] + prev[j];
+                else 
+                    curr[j] = prev[j];
+            }
+            prev = curr;
+        }
+
+        return (int)prev[m];
+    }
+
+    // Further Optimized Space Approach (Using Single Array)
+    int soo(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<double> prev(m + 1, 0);
+
+        prev[0] = 1; // Base case
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = m; j >= 1; j--) { // Reverse traversal to avoid overwriting
+                if (s[i - 1] == t[j - 1]) 
+                    prev[j] = prev[j - 1] + prev[j];
+            }
+        }
+
+        return (int)prev[m];
+    }
+
+    void numDistinct(string s, string t) {
+        int n = s.length(), m = t.length();
+
+        // Recursive (Memoization)
+        vector<vector<int>> dp(n, vector<int>(m, -1));
+        int recResult = rec(n - 1, m - 1, s, t, dp);
+        cout << "Recursive (Memoization) Result: " << recResult << endl;
+
+        // Tabulation
+        int tabResult = tab(s, t);
+        cout << "Tabulation Result: " << tabResult << endl;
+
+        // Space Optimized (Two Arrays)
+        int soResult = so(s, t);
+        cout << "Space Optimized (Two Arrays) Result: " << soResult << endl;
+
+        // Single Array Space Optimization
+        int sooResult = soo(s, t);
+        cout << "Single Array Space Optimized Result: " << sooResult << endl;
+    }
+};
+
+// Main Function for User Input
+int main() {
+    string str1, str2;
+
+    cout << "Enter the main string (s): ";
+    cin >> str1;
+    cout << "Enter the target string (t): ";
+    cin >> str2;
+
+    Solution sol;
+    sol.numDistinct(str1, str2);
+
+    return 0;
+}

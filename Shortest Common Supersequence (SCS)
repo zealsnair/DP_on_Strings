@@ -1,0 +1,118 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // Recursive Approach with Memoization
+    int rec(int i, int j, string &s, string &t, vector<vector<int>> &dp) {
+        if (i < 0) return j + 1; // If s is exhausted, take remaining characters of t
+        if (j < 0) return i + 1; // If t is exhausted, take remaining characters of s
+
+        if (dp[i][j] != -1) return dp[i][j];
+
+        if (s[i] == t[j])
+            return dp[i][j] = 1 + rec(i - 1, j - 1, s, t, dp);
+        
+        return dp[i][j] = 1 + min(rec(i - 1, j, s, t, dp), rec(i, j - 1, s, t, dp));
+    }
+
+    // Tabulation Approach (Bottom-Up DP)
+    string tab(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= m; j++) {
+                if (i == 0) dp[i][j] = j;  // If s is empty, take all from t
+                else if (j == 0) dp[i][j] = i;  // If t is empty, take all from s
+                else if (s[i - 1] == t[j - 1])
+                    dp[i][j] = 1 + dp[i - 1][j - 1];
+                else
+                    dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+
+        // Constructing the Shortest Common Supersequence (SCS)
+        string scs = "";
+        int i = n, j = m;
+        while (i > 0 && j > 0) {
+            if (s[i - 1] == t[j - 1]) {
+                scs += s[i - 1];
+                i--, j--;
+            } else if (dp[i - 1][j] < dp[i][j - 1]) {
+                scs += s[i - 1];
+                i--;
+            } else {
+                scs += t[j - 1];
+                j--;
+            }
+        }
+
+        // Adding remaining characters
+        while (i > 0) {
+            scs += s[i - 1];
+            i--;
+        }
+        while (j > 0) {
+            scs += t[j - 1];
+            j--;
+        }
+
+        reverse(scs.begin(), scs.end());
+        return scs;
+    }
+
+    // Space Optimized Approach (Using Two Arrays)
+    int so(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<int> prev(m + 1, 0), curr(m + 1, 0);
+
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= m; j++) {
+                if (i == 0) curr[j] = j;
+                else if (j == 0) curr[j] = i;
+                else if (s[i - 1] == t[j - 1])
+                    curr[j] = 1 + prev[j - 1];
+                else
+                    curr[j] = 1 + min(prev[j], curr[j - 1]);
+            }
+            prev = curr;
+        }
+
+        return prev[m]; // Only returns the length of SCS (not the sequence itself)
+    }
+
+    // Function to compute shortest common supersequence
+    void shortestSupersequence(string s, string t) {
+        int n = s.length(), m = t.length();
+
+        // Recursive (Memoization)
+        vector<vector<int>> dp(n, vector<int>(m, -1));
+        int recSCSLength = rec(n - 1, m - 1, s, t, dp);
+        cout << "Recursive (Memoization) SCS Length: " << recSCSLength << endl;
+
+        // Tabulation Approach
+        string tabSCS = tab(s, t);
+        cout << "Tabulation SCS: " << tabSCS << endl;
+        cout << "Tabulation SCS Length: " << tabSCS.length() << endl;
+
+        // Space Optimized Approach
+        int soSCSLength = so(s, t);
+        cout << "Space Optimized SCS Length: " << soSCSLength << endl;
+    }
+};
+
+// Main Function for User Input
+int main() {
+    string str1, str2;
+
+    cout << "Enter first string: ";
+    cin >> str1;
+    cout << "Enter second string: ";
+    cin >> str2;
+
+    Solution sol;
+    sol.shortestSupersequence(str1, str2);
+
+    return 0;
+}

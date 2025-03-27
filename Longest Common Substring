@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // Recursive Approach with Memoization
+    int rec(int ind1, int ind2, int count, string &s, string &t, vector<vector<vector<int>>> &dp) {
+        if (ind1 < 0 || ind2 < 0) return count;
+
+        if (dp[ind1][ind2][count] != -1) return dp[ind1][ind2][count];
+
+        int same = count;
+        if (s[ind1] == t[ind2])
+            same = rec(ind1 - 1, ind2 - 1, count + 1, s, t, dp);
+
+        int diff1 = rec(ind1 - 1, ind2, 0, s, t, dp);
+        int diff2 = rec(ind1, ind2 - 1, 0, s, t, dp);
+
+        return dp[ind1][ind2][count] = max({same, diff1, diff2});
+    }
+
+    // Tabulation Approach (Bottom-Up DP)
+    int tab(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+        int ans = 0;
+
+        for (int ind1 = 1; ind1 <= n; ++ind1) {
+            for (int ind2 = 1; ind2 <= m; ++ind2) {
+                if (s[ind1 - 1] == t[ind2 - 1]) {
+                    dp[ind1][ind2] = 1 + dp[ind1 - 1][ind2 - 1];
+                    ans = max(ans, dp[ind1][ind2]);
+                } else {
+                    dp[ind1][ind2] = 0;
+                }
+            }
+        }
+        return ans;
+    }
+
+    // Space Optimized Approach (Using Two Arrays)
+    int so(string &s, string &t) {
+        int n = s.length(), m = t.length();
+        vector<int> prev(m + 1, 0), curr(m + 1, 0);
+        int ans = 0;
+
+        for (int ind1 = 1; ind1 <= n; ++ind1) {
+            for (int ind2 = 1; ind2 <= m; ++ind2) {
+                if (s[ind1 - 1] == t[ind2 - 1]) {
+                    curr[ind2] = 1 + prev[ind2 - 1];
+                    ans = max(ans, curr[ind2]);
+                } else {
+                    curr[ind2] = 0;
+                }
+            }
+            prev = curr;
+        }
+        return ans;
+    }
+
+    // Main function to find the Longest Common Substring
+    void longestCommonSubstring(string s, string t) {
+        int n = s.length(), m = t.length();
+
+        // Recursive (Memoization)
+        vector<vector<vector<int>>> dp(n, vector<vector<int>>(m, vector<int>(min(n, m) + 1, -1)));
+        int recAns = rec(n - 1, m - 1, 0, s, t, dp);
+        cout << "Recursive (Memoization) LCS Length: " << recAns << endl;
+
+        // Tabulation Approach
+        int tabAns = tab(s, t);
+        cout << "Tabulation LCS Length: " << tabAns << endl;
+
+        // Space Optimized Approach
+        int soAns = so(s, t);
+        cout << "Space Optimized LCS Length: " << soAns << endl;
+    }
+};
+
+// Main Function for User Input
+int main() {
+    string s, t;
+
+    cout << "Enter first string: ";
+    cin >> s;
+    cout << "Enter second string: ";
+    cin >> t;
+
+    Solution sol;
+    sol.longestCommonSubstring(s, t);
+
+    return 0;
+}
